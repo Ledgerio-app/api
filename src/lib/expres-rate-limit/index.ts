@@ -10,7 +10,8 @@ const limiter = rateLimit({
   standardHeaders: 'draft-8', // use the latest standart rate-limit headers
   legacyHeaders: false, // deprecated X-Ratelimit headers
   message: {
-    error: 'You have send to many requests in a given amount time. Please try again later.',
+    error:
+      'You have send to many requests in a given amount time. Please try again later.',
   },
 });
 
