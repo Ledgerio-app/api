@@ -11,6 +11,7 @@ import bcrypt from 'bcrypt';
 import SignupController from '@/controllers/v1/auth/sign-up';
 import SigninController from '@/controllers/v1/auth/sign-in';
 import RefreshTokenController from '@/controllers/v1/auth/refresh-token';
+import LogoutController from '@/controllers/v1/auth/logout';
 
 /**
  * @description: middlewares
@@ -21,6 +22,7 @@ import ValidationError from '@/middlewares/validation-error';
  * @description: prisma
  */
 import { prisma } from '@/db';
+import authenticate from '@/middlewares/authenticate';
 
 const router = Router();
 
@@ -106,5 +108,7 @@ router.post(
   ValidationError,
   RefreshTokenController,
 );
+
+router.post('/logout', authenticate, LogoutController);
 
 export default router;
