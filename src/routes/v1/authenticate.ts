@@ -10,6 +10,7 @@ import bcrypt from 'bcrypt';
  */
 import SignupController from '@/controllers/v1/auth/sign-up';
 import SigninController from '@/controllers/v1/auth/sign-in';
+import RefreshTokenController from '@/controllers/v1/auth/refresh-token';
 
 /**
  * @description: middlewares
@@ -93,6 +94,17 @@ router.post(
     }),
   ValidationError,
   SigninController,
+);
+
+router.post(
+  '/refresh-token',
+  cookie('refreshToken')
+    .notEmpty()
+    .withMessage('refresh token is required.')
+    .isJWT()
+    .withMessage('Invalid refresh token'),
+  ValidationError,
+  RefreshTokenController,
 );
 
 export default router;
