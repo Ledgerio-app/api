@@ -16,7 +16,7 @@ import type { CorsOptions } from 'cors';
  * @description: custom modules
  */
 import config from '@/config';
-import limiter from '@/lib/expres_rate_limit';
+import limiter from '@/lib/expres-rate-limit';
 import { logger } from '@/lib/winston';
 import { prisma } from '@/db';
 
