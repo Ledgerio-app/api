@@ -17,12 +17,12 @@ import LogoutController from '@/controllers/v1/auth/logout';
  * @description: middlewares
  */
 import ValidationError from '@/middlewares/validation-error';
+import authenticate from '@/middlewares/authenticate';
 
 /**
  * @description: prisma
  */
 import { prisma } from '@/db';
-import authenticate from '@/middlewares/authenticate';
 
 const router = Router();
 
