@@ -21,6 +21,7 @@ import verify from '@/middlewares/verify';
  * @description: prisma
  */
 import { prisma } from '@/db';
+import GetUserByIdController from '@/controllers/v1/user/get-user-by-id';
 
 const router = Router();
 
@@ -65,6 +66,21 @@ router.put(
     .withMessage('Verify must be a boolean value.'),
   ValidationError,
   UpdateCurrentUserController,
+);
+
+router.get(
+  '/:userId',
+  authenticate,
+  verify(),
+  param('userId')
+    .notEmpty()
+    .withMessage('User ID is required.')
+    .isLength({ min: 25, max: 25 })
+    .withMessage('Invalid user ID format.')
+    .matches(/^c[a-z0-9]{24}$/)
+    .withMessage('Invalid user ID format.'),
+  ValidationError,
+  GetUserByIdController,
 );
 
 export default router;
