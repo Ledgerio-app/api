@@ -417,4 +417,7 @@ ISC
 
 ## Author
 
-Ledgerio Team
+**Oleksandr Lobanov**
+
+[![Telegram](https://img.shields.io/badge/Telegram-@alexalexdev-26A5E4?logo=telegram&logoColor=white)](https://t.me/alexalexdev)
+[![Instagram](https://img.shields.io/badge/Instagram-alex.alex.lobanov-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/alex.alex.lobanov/)
