@@ -1,22 +1,42 @@
+<div align="center">
+
 # Ledgerio API
 
-A RESTful API built with Node.js, Express, TypeScript, and Prisma for user authentication and management.
+A RESTful API for time tracking and invoicing, built with Node.js, Express, TypeScript, and Prisma.
 
-## Table of Contents
+![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15%2B-4169E1?logo=postgresql&logoColor=white)
+![License](https://img.shields.io/badge/license-ISC-lightgrey)
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
-- [API Endpoints](#api-endpoints)
-- [Database Schema](#database-schema)
-- [Development](#development)
-- [Security Features](#security-features)
+</div>
 
-## Features
+---
 
-- User authentication with JWT (Access & Refresh tokens)
+## 📑 Table of Contents
+
+- [✨ Features](#-features)
+- [🧰 Tech Stack](#-tech-stack)
+- [🧭 Architecture](#-architecture)
+- [🗂️ Project Structure](#️-project-structure)
+- [🚀 Getting Started](#-getting-started)
+- [🔧 Environment Variables](#-environment-variables)
+- [📡 API Endpoints](#-api-endpoints)
+- [🔐 Authentication Flow](#-authentication-flow)
+- [🗄️ Database Schema](#️-database-schema)
+- [🛠️ Development](#️-development)
+- [🛡️ Security Features](#️-security-features)
+- [⚠️ Error Handling](#️-error-handling)
+- [✅ Validation Rules](#-validation-rules)
+- [📄 License](#-license)
+
+---
+
+## ✨ Features
+
+- User authentication with JWT (access & refresh tokens)
 - User registration and login
 - User profile management
 - Secure password hashing with bcrypt
@@ -31,23 +51,36 @@ A RESTful API built with Node.js, Express, TypeScript, and Prisma for user authe
 - Comprehensive logging with Winston
 - TypeScript for type safety
 
-## Tech Stack
+## 🧰 Tech Stack
 
-- **Runtime**: Node.js
-- **Framework**: Express.js v5
-- **Language**: TypeScript
-- **Database**: PostgreSQL
-- **ORM**: Prisma
-- **Authentication**: JWT (jsonwebtoken)
-- **Password Hashing**: bcrypt
-- **Validation**: express-validator
-- **Logging**: Winston
-- **Security**: Helmet, CORS, express-rate-limit
-- **Dev Tools**: nodemon, ts-node
+| Category         | Technology                          |
+| ----------------- | ------------------------------------ |
+| Runtime           | Node.js                              |
+| Framework         | Express.js v5                        |
+| Language          | TypeScript                           |
+| Database          | PostgreSQL                           |
+| ORM               | Prisma                               |
+| Authentication    | JWT (`jsonwebtoken`)                 |
+| Password hashing  | bcrypt                               |
+| Validation        | express-validator                    |
+| Logging           | Winston                              |
+| Security          | Helmet, CORS, express-rate-limit     |
+| Dev tools         | nodemon, ts-node                     |
 
-## Project Structure
+## 🧭 Architecture
 
+```mermaid
+flowchart LR
+    Client(["🖥️ Client"]) -->|HTTP / JSON| API["🚂 Express API"]
+    API -->|reads / writes| Prisma[("🔺 Prisma Client")]
+    Prisma --> DB[("🐘 PostgreSQL")]
+    API -->|signs & verifies| JWT["🔑 JWT Access / Refresh Tokens"]
+    JWT -.->|refresh token stored in| DB
 ```
+
+## 🗂️ Project Structure
+
+```text
 src/
 ├── @types/           # TypeScript type definitions
 ├── config/           # Application configuration
@@ -71,7 +104,7 @@ src/
 └── ...
 ```
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -81,41 +114,48 @@ src/
 
 ### Installation
 
-1. Clone the repository:
+**1. Clone the repository**
+
 ```bash
 git clone <repository-url>
 cd ledgerio/api
 ```
 
-2. Install dependencies:
+**2. Install dependencies**
+
 ```bash
 npm install
 ```
 
-3. Set up environment variables:
+**3. Set up environment variables**
+
 ```bash
 cp .env.example .env
 ```
+
 Edit `.env` with your configuration.
 
-4. Run database migrations:
+**4. Run database migrations**
+
 ```bash
 npm run db:migrate
 ```
 
-5. Generate Prisma Client:
+**5. Generate Prisma Client**
+
 ```bash
 npm run db:generate
 ```
 
-6. Start development server:
+**6. Start the development server**
+
 ```bash
 npm run dev
 ```
 
-The API will be available at `http://localhost:5001`
+The API will be available at `http://localhost:5001`.
 
-## Environment Variables
+## 🔧 Environment Variables
 
 Create a `.env` file in the root directory with the following variables:
 
@@ -140,83 +180,134 @@ REFRESH_TOKEN_EXPIRE=7d
 LOG_LEVEL=info
 ```
 
-## API Endpoints
+## 📡 API Endpoints
 
-### Base URL
+Base URL: `http://localhost:5001/v1`
+
+| Method   | Endpoint              | Auth required | Description                |
+| -------- | ---------------------- | :------------: | --------------------------- |
+| `GET`    | `/`                    | –              | Health check                |
+| `POST`   | `/auth/sign-up`        | –              | Register a new user         |
+| `POST`   | `/auth/sign-in`        | –              | Log in                      |
+| `POST`   | `/auth/refresh-token`  | Cookie         | Issue a new access token    |
+| `POST`   | `/auth/logout`         | ✅             | Log out, revoke refresh token |
+| `GET`    | `/user/current`        | ✅             | Get the current user's profile |
+| `PUT`    | `/user/current`        | ✅             | Update the current user's profile |
+| `GET`    | `/user/:userId`        | ✅             | Get a user by ID            |
+| `DELETE` | `/user/:userId`        | ✅             | Delete a user by ID         |
+
+### Authentication routes (`/auth`)
+
+<details>
+<summary><strong>POST /auth/sign-up</strong></summary>
+
+```json
+{
+  "email": "user@example.com",
+  "name": "username",
+  "password": "password123"
+}
 ```
-http://localhost:5001/v1
+
+</details>
+
+<details>
+<summary><strong>POST /auth/sign-in</strong></summary>
+
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
 ```
 
-### Health Check
-- **GET** `/` - Check API status
+</details>
 
-### Authentication Routes (`/auth`)
+<details>
+<summary><strong>POST /auth/refresh-token</strong></summary>
 
-#### Sign Up
-- **POST** `/auth/sign-up`
-- **Body**:
-  ```json
-  {
-    "email": "user@example.com",
-    "name": "username",
-    "password": "password123"
-  }
-  ```
+Reads the `refreshToken` cookie (HTTP-only) and returns a new access token.
 
-#### Sign In
-- **POST** `/auth/sign-in`
-- **Body**:
-  ```json
-  {
-    "email": "user@example.com",
-    "password": "password123"
-  }
-  ```
+</details>
 
-#### Refresh Token
-- **POST** `/auth/refresh-token`
-- **Cookie**: `refreshToken` (JWT)
+<details>
+<summary><strong>POST /auth/logout</strong></summary>
 
-#### Logout
-- **POST** `/auth/logout`
-- **Headers**: `Authorization: Bearer <access_token>`
+Requires `Authorization: Bearer <access_token>`. Revokes the refresh token and clears the cookie.
 
-### User Routes (`/user`)
+</details>
 
-All user routes require authentication via JWT token in Authorization header.
+### User routes (`/user`)
 
-#### Get Current User
-- **GET** `/user/current`
-- **Headers**: `Authorization: Bearer <access_token>`
+All user routes require `Authorization: Bearer <access_token>`.
 
-#### Update Current User
-- **PUT** `/user/current`
-- **Headers**: `Authorization: Bearer <access_token>`
-- **Body** (all fields optional):
-  ```json
-  {
-    "email": "newemail@example.com",
-    "name": "newusername",
-    "first_name": "John",
-    "last_name": "Doe",
-    "currency": "USD",
-    "verify": true
-  }
-  ```
+<details>
+<summary><strong>GET /user/current</strong> — get the current user's profile</summary>
 
-#### Get User By ID
-- **GET** `/user/:userId`
-- **Headers**: `Authorization: Bearer <access_token>`
-- **Params**: `userId` (CUID format: 25 characters starting with 'c')
+No body.
 
-#### Delete User By ID
-- **DELETE** `/user/:userId`
-- **Headers**: `Authorization: Bearer <access_token>`
-- **Params**: `userId` (CUID format)
+</details>
 
-## Database Schema
+<details>
+<summary><strong>PUT /user/current</strong> — update the current user's profile (all fields optional)</summary>
 
-### User Model
+```json
+{
+  "email": "newemail@example.com",
+  "name": "newusername",
+  "first_name": "John",
+  "last_name": "Doe",
+  "currency": "USD",
+  "verify": true
+}
+```
+
+</details>
+
+<details>
+<summary><strong>GET /user/:userId</strong> — get a user by ID</summary>
+
+`userId` must be a valid CUID (25 characters, starts with `c`).
+
+</details>
+
+<details>
+<summary><strong>DELETE /user/:userId</strong> — delete a user by ID</summary>
+
+`userId` must be a valid CUID (25 characters, starts with `c`).
+
+</details>
+
+## 🔐 Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant C as 🖥️ Client
+    participant A as 🚂 API
+    participant DB as 🐘 PostgreSQL
+
+    C->>A: POST /auth/sign-up (email, name, password)
+    A->>A: hash password (bcrypt)
+    A->>DB: create User
+    A->>DB: create Token (refresh token)
+    A-->>C: 200 + accessToken + refreshToken cookie
+
+    C->>A: GET /user/current (Bearer accessToken)
+    A-->>C: 200 + user profile
+
+    C->>A: POST /auth/refresh-token (cookie)
+    A->>DB: check refresh token exists
+    A-->>C: 200 + new accessToken
+
+    C->>A: POST /auth/logout (Bearer accessToken)
+    A->>DB: delete Token
+    A-->>C: 204 + cookie cleared
+```
+
+## 🗄️ Database Schema
+
+### User
+
 ```prisma
 model User {
   id           String   @id @default(cuid())
@@ -233,7 +324,8 @@ model User {
 }
 ```
 
-### Token Model
+### Token
+
 ```prisma
 model Token {
   id        String   @id @default(cuid())
@@ -245,57 +337,44 @@ model Token {
 }
 ```
 
-## Development
+## 🛠️ Development
 
-### Available Scripts
+### Available scripts
 
-- `npm run dev` - Start development server with hot reload
-- `npm run db:migrate` - Run database migrations
-- `npm run db:generate` - Generate Prisma Client
-- `npm run db:studio` - Open Prisma Studio (database GUI)
+| Script               | Description                              |
+| --------------------- | ----------------------------------------- |
+| `npm run dev`         | Start the dev server with hot reload     |
+| `npm run db:migrate`  | Run database migrations                  |
+| `npm run db:generate` | Generate the Prisma Client               |
+| `npm run db:studio`   | Open Prisma Studio (database GUI)        |
 
-### Database Management
+## 🛡️ Security Features
 
-#### Create a new migration
-```bash
-npm run db:migrate
-```
-
-#### View database in Prisma Studio
-```bash
-npm run db:studio
-```
-
-## Security Features
-
-### Authentication
+**🔑 Authentication**
 - JWT-based authentication with access and refresh tokens
 - Refresh tokens stored in HTTP-only cookies
 - Password hashing using bcrypt
 
-### Request Security
-- **Helmet**: Sets security-related HTTP headers
-- **CORS**: Configurable cross-origin resource sharing
-- **Rate Limiting**: Prevents abuse and DDoS attacks
-- **Input Validation**: All inputs validated using express-validator
-- **Password Requirements**: Minimum 8 characters
+**🌐 Request security**
+- Helmet — sets security-related HTTP headers
+- CORS — configurable cross-origin resource sharing
+- Rate limiting — mitigates abuse and brute-force/DDoS attempts
+- Input validation — every input validated with express-validator
+- Password requirements — minimum 8 characters
 
-### Data Protection
+**🔒 Data protection**
 - Passwords never stored in plain text
 - Password hashes excluded from API responses
 - CUID validation for user IDs
 - SQL injection protection via Prisma ORM
 
-### Response Optimization
-- Compression middleware for reduced payload size
-- Response compression threshold: 1KB
+**⚡ Response optimization**
+- Compression middleware for smaller payloads (threshold: 1KB)
 
-### Logging
-- Winston logger for comprehensive application logging
-- Different log levels (info, warn, error)
-- Structured logging for better debugging
+**📝 Logging**
+- Winston logger with structured, leveled logging (info/warn/error)
 
-## Error Handling
+## ⚠️ Error Handling
 
 The API returns consistent error responses:
 
@@ -303,43 +382,36 @@ The API returns consistent error responses:
 {
   "code": "ErrorCode",
   "message": "Human-readable error message",
-  "error": {} // Additional error details (development only)
+  "error": {}
 }
 ```
 
-### Common HTTP Status Codes
-- `200` - Success
-- `201` - Created
-- `204` - No Content (successful deletion)
-- `400` - Bad Request (validation errors)
-- `401` - Unauthorized (authentication required)
-- `404` - Not Found
-- `500` - Internal Server Error
+`error` is only populated in development.
 
-## Validation Rules
+| Status | Meaning                              |
+| ------ | -------------------------------------- |
+| `200`  | Success                                |
+| `201`  | Created                                |
+| `204`  | No Content (successful deletion)       |
+| `400`  | Bad Request (validation errors)        |
+| `401`  | Unauthorized (authentication required) |
+| `404`  | Not Found                              |
+| `500`  | Internal Server Error                  |
 
-### Email
-- Required for registration and login
-- Must be valid email format
-- Maximum 50 characters
-- Must be unique
+## ✅ Validation Rules
 
-### Password
-- Minimum 8 characters
-- Required for registration and login
+| Field             | Rules                                                             |
+| ------------------ | ------------------------------------------------------------------ |
+| `email`           | required (sign-up/sign-in), valid format, max 50 chars, unique   |
+| `password`        | required, min 8 characters                                       |
+| `name`            | max 20 characters                                                 |
+| `first_name`      | optional, max 20 characters                                      |
+| `last_name`       | optional, max 20 characters                                      |
+| `currency`        | optional, max 3 characters, auto-uppercased                      |
+| `verify`          | optional, boolean                                                 |
+| `userId` (param)  | valid CUID — 25 characters, starts with `c`, pattern `^c[a-z0-9]{24}$` |
 
-### User Fields
-- `name`: Maximum 20 characters
-- `first_name`: Maximum 20 characters (optional)
-- `last_name`: Maximum 20 characters (optional)
-- `currency`: Maximum 3 characters (optional, auto-uppercased)
-- `verify`: Boolean (optional)
-
-### User ID
-- Must be valid CUID format (25 characters, starts with 'c')
-- Pattern: `^c[a-z0-9]{24}$`
-
-## License
+## 📄 License
 
 ISC
 
