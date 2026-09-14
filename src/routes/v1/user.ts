@@ -9,6 +9,9 @@ import { param, query, body } from 'express-validator';
  */
 import GetCurrentUserController from '@/controllers/v1/user/get-current-user';
 import UpdateCurrentUserController from '@/controllers/v1/user/update-current-user';
+import GetUserByIdController from '@/controllers/v1/user/get-user-by-id';
+import DeleteUserByIdController from '@/controllers/v1/user/delete-user-by-id';
+import GetAllUsersController from '@/controllers/v1/user/get-all-users';
 
 /**
  * @description: middlewares
@@ -21,10 +24,24 @@ import verify from '@/middlewares/verify';
  * @description: prisma
  */
 import { prisma } from '@/db';
-import GetUserByIdController from '@/controllers/v1/user/get-user-by-id';
-import DeleteUserByIdController from '@/controllers/v1/user/delete-user-by-id';
 
 const router = Router();
+
+router.get(
+  '/',
+  authenticate,
+  verify(),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 50 })
+    .withMessage('Limit must be between 1 to 50.'),
+  query('offset')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Offset must be a positive number.'),
+  ValidationError,
+  GetAllUsersController,
+);
 
 router.get('/current', authenticate, verify(), GetCurrentUserController);
 
